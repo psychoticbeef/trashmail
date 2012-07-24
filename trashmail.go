@@ -1,18 +1,18 @@
 package main
 
 import (
+	"bufio"
+	"flag"
+	"fmt"
+	"github.com/kless/goconfig/config"
 	"io/ioutil"
 	"os"
-	"bufio"
-	"strings"
-	"fmt"
 	"regexp"
-	"flag"
-	"github.com/kless/goconfig/config"
+	"strings"
 )
 
 var (
-	home = os.ShellExpand("$HOME")
+	home = os.ExpandEnv("$HOME")
 
 	c, _            = config.ReadDefault(home + "/.trashmailrc")
 	host, _         = c.String("default", "host")
@@ -32,18 +32,17 @@ var (
 	service = make(map[string]string, 1)
 )
 
-
 func main() {
 	flag.Parse()
 
 	// read file that contains email addresses and corresponding services
-	f, _ := os.Open(os.ShellExpand(mailListFile))
+	f, _ := os.Open(os.ExpandEnv(mailListFile))
 	defer f.Close()
 	r := bufio.NewReader(f)
 	kvLine, isPrefix, err := r.ReadLine()
 	for err == nil && !isPrefix {
 		s := string(kvLine)
-		kv := strings.Split(s, "\t", -1)
+		kv := strings.Split(s, "\t")
 		service[kv[0]] = kv[1]
 		kvLine, isPrefix, err = r.ReadLine()
 	}
